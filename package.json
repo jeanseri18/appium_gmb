@@ -1,0 +1,24 @@
+{
+  "name": "appuim",
+  "version": "1.0.0",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "appium": "^1.22.3",
+    "axios": "^1.7.4",
+    "cheerio": "^1.0.0",
+    "chromedriver": "^127.0.2",
+    "geolib": "^3.3.4",
+    "selenium-webdriver": "^4.23.0",
+    "wd": "^0.0.26"
+  },
+  "devDependencies": {
+    "webdriverio": "^9.0.1"
+  }
+}
