@@ -246,7 +246,7 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
                 const numPoints = 30; // Nombre de points intermédiaires
 
                 const startPoint = limitedLongitude + ',' + limitedLatitude; // Point de départ
-                const endPoint = latitude + ',' + longitude; // Point d'arrivée
+                const endPoint = longitude + ',' + latitude; // Point d'arrivée
                 const accessToken = 'pk.eyJ1IjoiZmZzY2giLCJhIjoiY20wN3VyN2tuMDJ4ZzJxc2J1azYzOTg1MSJ9.r20psHXcWEEgeJBx-99OFg';
 
 
@@ -313,7 +313,7 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
 
 
 
-        await driver.pause(15000);
+        await driver.pause(1000);
     } catch (error) {
         console.error(`Erreur dans la fonction searchOnGoogle: ${error.message}`);
     }
@@ -326,7 +326,7 @@ function calculateWalkingSpeed(distance, maxDuration = 300) {
 
 // Fonction pour obtenir l'itinéraire entre deux points avec une vitesse de marche ajustée
 async function getRouteWithWalkingSpeed(start, end, accessToken) {
-    const distance = 399.027; // Distance totale du trajet en mètres
+    const distance = 1000.027; // Distance totale du trajet en mètres
     const walkingSpeed = calculateWalkingSpeed(distance); // Calculer la vitesse de marche
 
     const baseUrl = 'https://api.mapbox.com/directions/v5/mapbox/walking/';
@@ -785,7 +785,7 @@ async function runTests() {
             console.error('Error during test cycle:', error.message);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 180000)); // Attendre 3 minutes avant de vérifier à nouveau
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 3 minutes avant de vérifier à nouveau
     }
 }
 // runTests().catch(console.error);
