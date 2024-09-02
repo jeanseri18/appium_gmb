@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8d7da;
+            color: #721c24;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .error-message {
+            background-color: #f5c6cb;
+            border: 1px solid #f5c6cb;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-message">
+        <h1>Une erreur est survenue</h1>
+        <p id="error-details">Les détails de l'erreur seront affichés ici.</p>
+    </div>
+    <script>
+        // Récupérer les détails de l'erreur depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorDetails = urlParams.get('error');
+        document.getElementById('error-details').textContent = errorDetails || 'Aucune information sur l\'erreur disponible.';
+    </script>
+</body>
+</html>

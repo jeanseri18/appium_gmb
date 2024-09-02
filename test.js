@@ -10,7 +10,31 @@ const port = 3000;
 
 // URL de l'API
 const apiUrl = 'http://127.0.0.1:8000/api/histories/detail';
+/**
+ * Met à jour les données d'historique via une requête GET.
+ * 
+ * @param {Object} fields - Les champs à mettre à jour.
+ * @param {string} apiURL - L'URL de l'API pour la mise à jour.
+ * @returns {Promise<void>}
+ */
+async function updateHistoryData(fields, apiURL) {
+    try {
+        // Créer une chaîne de requête à partir des champs
+        const queryString = new URLSearchParams(fields).toString();
 
+        // Construire l'URL complète avec les paramètres de requête
+        const url = `${apiURL}?${queryString}`;
+
+        // Envoi de la requête GET avec axios
+        const response = await axios.get(url);
+
+        // Afficher la réponse en cas de succès
+        console.log('Update successful:', response.data);
+    } catch (error) {
+        // Afficher les détails de l'erreur
+        console.error('Error updating history data:', error.response ? error.response.data : error.message);
+    }
+}
 // Fonction pour récupérer les données de l'API
 async function fetchDevicesFromApi() {
     try {
@@ -29,12 +53,14 @@ async function fetchDevicesFromApi() {
                 url: customer.url_gmyb || 'https://www.defaulturl.com',
                 phone: device.typephone || 'Not Provided', // Utilisation du typephone comme numéro de téléphone
                 status: item.history.status === 1,
-                picture: item.history.picture ,
-                review: item.history.review ,
-                information: item.history.information ,
-                call: item.history.call ,
-                website: item.history.website ,
-                itineraire: item.history.itineraire ,
+                picture: item.history.picture,
+                review: item.history.review,
+                information: item.history.information,
+                call: item.history.call,
+                website: item.history.website,
+                itineraire: item.history.itineraire,
+                urlUdpate: 'http://127.0.0.1:8000/histories/increment-user-history/' + customer.id + '/'
+
                 // Convertir le statut 1 à true
             };
         });
@@ -128,9 +154,18 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
     information,
     call,
     website,
-    itineraire ) {
+    itineraire, urlUdpate) {
     try {
-
+        // await updateHistoryData({
+        //     picture: 0,
+        //     review: 1,
+        //     information: 0,
+        //     call: 0,
+        //     website: 0,
+        //     itineraire: 0,
+        //     status: 0,
+           
+        // },  urlUdpate);
 
         await driver.url(' https://www.google.fr');
         const searchBox = await driver.$('textarea[name="q"]');
@@ -140,7 +175,7 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
         await driver.keys('Enter');
         await driver.pause(3000);
 
-        await moreCompagnyFunction(driver);
+        await moreCompagnyFunction(driver,agence_name);
 
 
         await driver.pause(5000);
@@ -149,6 +184,11 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
         const tabReviews = await driver.$('//a[@role="tab"]//span[text()="Avis"]');
         const istabReviewsExisting = await tabReviews.isExisting();
         if (istabReviewsExisting) {
+            await updateHistoryData({
+                review: 1,
+          
+               
+            },  urlUdpate);
             await tabReviews.click();
             await driver.pause(2000);
 
@@ -168,13 +208,30 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
         }
 
         if (rand < 0.7) {
-           if (picture)
-            await clickTab(driver, selectors.images); // 70% chance to consult images
+            if (picture)
+                await clickTab(driver, selectors.images); // 70% chance to consult images
+            await updateHistoryData({
+                picture: 1,
+           
+                
+            },urlUdpate);
         } else if (rand < 0.7 + 0.3) {
             if (information)
                 await clickTab(driver, selectors.services); // 30% chance to consult services
+            await updateHistoryData({
+          
+                information: 1,
+             
+                
+            },urlUdpate);
         } else {
-            await clickTab(driver, selectors.about); // Fallback for other cases
+            await clickTab(driver, selectors.about);
+            await updateHistoryData({
+            
+                information: 1,
+                
+                
+            }),urlUdpate;// Fallback for other cases
         }
 
 
@@ -255,40 +312,44 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
                 await driver.pause(5000);
 
                 // Exemple d'utilisation
-         
+
 
                 // Générer les étapes intermédiaires en ligne droite
-            
+
                 // Simuler le déplacement
 
                 const navButtonSelector = 'button[aria-label="Utiliser la navigation dans l\'application"]';
                 // const startButtonXPath = '//button[@aria-label="Démarrer" and contains(@class, "BXErWc Uv8bJd")]';
-        
+
                 // Chercher le bouton "Utiliser la navigation dans l'application"
                 const navButton = await driver.$(navButtonSelector);
-        
+
                 if (await navButton.isExisting() && await navButton.isDisplayed()) {
                     // Cliquer sur le bouton "Utiliser la navigation dans l'application"
                     await navButton.click();
                     console.log('Clicked on "Utiliser la navigation dans l\'application".');
                 } else {
                     // Si le bouton n'est pas trouvé ou visible, chercher et cliquer sur le bouton "Démarrer"
-                   // Localisez le bouton "Démarrer"
-        let startButton = await driver.$('button[aria-label="Démarrer"]');
+                    // Localisez le bouton "Démarrer"
+                    let startButton = await driver.$('button[aria-label="Démarrer"]');
 
 
-        await driver.pause(1000);
+                    await driver.pause(1000);
 
-        // Essayez de cliquer sur l'élément
-        await startButton.click();
-                 
+                    // Essayez de cliquer sur l'élément
+                    await startButton.click();
+
                 }
                 await driver.pause(15000);
-
-             await   getRouteWithWalkingSpeed(startPoint, endPoint, accessToken)
+        // const startPoint = '-74.13807,40.767045'; // Point de départ
+        // const endPoint = '-74.290976,40.826347'; // Point d'arrivée
+        // const accessToken = 'pk.eyJ1IjoiZmZzY2giLCJhIjoiY20wN3VyN2tuMDJ4ZzJxc2J1azYzOTg1MSJ9.r20psHXcWEEgeJBx-99OFg';
+        
+                await getRouteWithWalkingSpeed(startPoint, endPoint, accessToken)
                     .then(routeData => {
                         const steps = routeData.routes[0].legs[0].steps;
                         simulateMovement(steps);
+
                     })
                     .catch(error => {
                         console.error('Failed to get route:', error);
@@ -300,7 +361,17 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
             } else {
                 console.error("L'input n'a pas été trouvé.");
             }
-            await driver.pause(5000);
+            await driver.pause(200000);
+            await    updateHistoryData({
+                picture: 1,
+                review: 1,
+                information: 1,
+                call: 1,
+                website: 1,
+                itineraire: 1,
+                status: 1,
+               
+            },urlUdpate);
             // await driver.closeApp();
             console.log('Google Maps closed successfully');
 
@@ -309,7 +380,7 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
         } await driver.pause(5000);
 
 
-     
+
 
 
 
@@ -319,14 +390,14 @@ async function searchOnGoogle(driver, keyword, agence_name, url, phone, picture,
     }
 }
 
-function calculateWalkingSpeed(distance, maxDuration = 300) {
+function calculateWalkingSpeed(distance, maxDuration = 3000) {
     const speed = distance / maxDuration;
     return Math.min(Math.max(speed, 0.14), 6.94); // Limiter la vitesse entre 0.14 m/s et 6.94 m/s
 }
 
 // Fonction pour obtenir l'itinéraire entre deux points avec une vitesse de marche ajustée
 async function getRouteWithWalkingSpeed(start, end, accessToken) {
-    const distance = 1000.027; // Distance totale du trajet en mètres
+    const distance = 399.027; // Distance totale du trajet en mètres
     const walkingSpeed = calculateWalkingSpeed(distance); // Calculer la vitesse de marche
 
     const baseUrl = 'https://api.mapbox.com/directions/v5/mapbox/walking/';
@@ -341,7 +412,6 @@ async function getRouteWithWalkingSpeed(start, end, accessToken) {
 
     try {
         const response = await axios.get(`${baseUrl}${start};${end}?${params.toString()}`);
-        console.log('ok in');
         return response.data;
     } catch (error) {
         console.error('Error fetching route:', error);
@@ -395,6 +465,7 @@ async function simulateMovement(steps) {
         index++;
     }, timePerStep); // Intervalle ajusté pour limiter la durée totale à 5 minutes
 }
+
 
 // Fonction pour mettre à jour la position avec ADB
 function updateLocation(latitude, longitude) {
@@ -477,7 +548,7 @@ async function handleModal(driver) {
 }
 
 
-async function moreCompagnyFunction(driver) {
+async function moreCompagnyFunction(driver,agence_name) {
     const link = await driver.$('//a[.//span[text()="Plus d\'entreprises"]]');
     await link.waitForExist({ timeout: 30000 });
     console.log('Scrolling to the link...');
@@ -498,6 +569,19 @@ async function moreCompagnyFunction(driver) {
 
         // Rechercher l'élément "TWINS IMMOBILIER" dans la liste des résultats
         const twinsLink = await driver.$('//span[contains(text(), "TWINS IMMOBILIER")]');
+        const link = await driver.$(`//div[text()="${agence_name}"]`);
+
+        // Vérifiez si l'élément existe avant de cliquer
+        const isExisting = await link.isExisting();
+        if (isExisting) {
+            await link.click();
+            await driver.pause(10000);
+
+            console.log(`L'élément "${agence_name}" a été cliqué avec succès !`);
+        } else {
+            console.log(`L'élément "${agence_name}" n'a pas été trouvé.`);
+        }
+        
         if (await twinsLink.isDisplayed()) {
             twinsFound = true;
             await twinsLink.click();
@@ -505,6 +589,7 @@ async function moreCompagnyFunction(driver) {
         } else {
             // Faire défiler la page
             try {
+               
                 const loadMoreButton = await driver.$('//a[contains(@class, "T7sFge") and contains(@aria-label, "Autres résultats de recherche")]');
                 if (await loadMoreButton.isDisplayed()) {
                     await loadMoreButton.click(); // Cliquer sur "Autres résultats de recherche"
@@ -514,21 +599,24 @@ async function moreCompagnyFunction(driver) {
                 }
             } catch (error) {
                 // Si le bouton n'est pas trouvé, continuer à défiler
+                
                 await driver.execute('window.scrollBy(0, 500)');
                 await driver.pause(1000); // Pause pour permettre le chargement
             }
         }
         attempts++; // Incrémenter le compteur de tentatives
-        if(attempts > maxAttempts && !twinsFound ) { await driver.deleteSession();
-            console.log("Session fermée.");}
+        if (attempts > maxAttempts && !twinsFound) {
+            await driver.deleteSession();
+            console.log("Session fermée.");
+        }
     }
 
-    if (!twinsFound ) {
+    if (!twinsFound) {
         console.log("TWINS IMMOBILIER n'a pas été trouvé après 15 tentatives.");
     }
 
     // Fermer la session
-  
+
 }
 
 
@@ -719,13 +807,13 @@ async function searchOnGoogleMaps(driver, keyword, agence_name, url, phone) {
 }
 
 // Fonction pour exécuter un test sur un appareil spécifique
-async function runTestOnDevice(device ) {
-    const { deviceName, udid, keyword, agence_name, url, phone, status , picture,
+async function runTestOnDevice(device) {
+    const { deviceName, udid, keyword, agence_name, url, phone, status, picture,
         review,
         information,
         call,
         website,
-        itineraire,
+        itineraire, urlUdpate
     } = device;
     // const picture,
     // const review,
@@ -760,7 +848,7 @@ async function runTestOnDevice(device ) {
                 information,
                 call,
                 website,
-                itineraire);
+                itineraire, urlUdpate);
         }
     } catch (error) {
         console.error(`Test failed on ${deviceName}:`, error);
